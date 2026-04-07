@@ -23,12 +23,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
@@ -37,10 +40,24 @@ jobs:
       - name: Generate feeds
         run: npm run scrape
 
+      - name: Pack Pages artifact
+        run: |
+          tar \
+            --dereference --hard-dereference \
+            --directory public \
+            --exclude=.git \
+            --exclude=.github \
+            -cvf "$RUNNER_TEMP/github-pages.tar" \
+            .
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
-          path: ./public
+          name: github-pages
+          path: ${{ runner.temp }}/github-pages.tar
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,4 +69,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
