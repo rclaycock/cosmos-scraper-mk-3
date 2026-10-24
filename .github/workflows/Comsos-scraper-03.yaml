@@ -1,4 +1,4 @@
-name: Cosmos Gallery 03
+name: Cosmos Gallery 03 - edit to save
 
 on:
   workflow_dispatch:
